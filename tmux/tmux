@@ -1,0 +1,3 @@
+#!/bin/bash
+
+alias tmux='tmux -f ~/.config/dot-files-conf/tmux.conf'

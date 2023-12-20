@@ -1,0 +1,98 @@
+#!/bin/bash
+
+source $HOME/.config/dot-files-conf/proxy.conf
+
+#private function start
+function __enableProxy() {
+    export HTTPS_PROXY=http://$PROXY_ADDRESS
+    export HTTP_PROXY=http://$PROXY_ADDRESS
+    export ALL_PROXY=http://$PROXY_ADDRESS
+}
+
+function __disableProxy() {
+    unset HTTPS_PROXY
+    unset HTTP_PROXY
+    unset ALL_PROXY
+}
+
+function __pon() {
+
+    __enableProxy
+
+    if [ "$1" = "-s" ]; then
+        return
+    else
+        echo "Proxy On."
+    fi
+}
+
+function __poff() {
+
+    __disableProxy
+
+    if [ "$1" = "-s" ]; then
+        return
+    else
+        echo "Proxy Off."
+    fi
+}
+
+function __check() {
+    # Define the URL to test
+    url="https://www.google.com"
+
+    # Set timeout for curl command
+    timeout=5
+
+    # Execute curl command
+    curl_output=$(curl -s --max-time $timeout -o /dev/null -w '%{http_code}' $url)
+
+    # Check the curl exit code and output
+    if [[ $? -eq 0 && $curl_output -eq 200 ]]; then
+        echo "Proxy is working correctly."
+    else
+        echo "Proxy is not working or unreachable."
+    fi
+}
+
+function __pstatus() {
+
+    echo "Proxy Status checking..."
+    __check
+}
+
+function __pinfo() {
+    echo "Proxy conf:"
+    echo "Proxy IP:     $PROXY_IP"
+    echo "Proxy PORT:   $PROXY_PORT"
+    echo ""
+    echo "HTTPS_PROXY = $HTTPS_PROXY"
+    echo "HTTP_PROXY =  $HTTP_PROXY"
+    echo "ALL_PROXY =   $ALL_PROXY"
+}
+
+#private function end
+
+
+function gproxy() {
+    # Usage examples
+    case "$1" in
+        on)
+            shift
+            #set_proxy "$@"
+            __pon "$@"
+            ;;
+        off)
+            __poff
+            ;;
+        status)
+            __pstatus
+            ;;
+        info)
+            __pinfo
+            ;;
+        *)
+            echo "Usage: $0 {on|off|status|info}"
+            ;;
+    esac
+}
